@@ -1,0 +1,4 @@
+---
+[nodes]
+node1.opsschool.com ansible_host=10.10.0.120
+node2.opsschool.com ansible_host=10.10.0.121

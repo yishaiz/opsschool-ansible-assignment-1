@@ -1,0 +1,42 @@
+---
+- hosts: nodes
+  remote_user: centos
+  become: yes
+  tasks:
+
+  - name: Install Apache Webserver
+    package:
+      pkg=httpd
+      state=latest
+  - name: Place the index file at project root
+    copy:
+      src=index.html
+      dest=/var/www/html/index.html
+      owner=apache
+      group=apache
+      mode=0644
+
+  - name: Add the inventory into /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '.*{{ item }}$'
+      line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{item}}"
+      state: present
+    when: hostvars[item]['ansible_facts']['default_ipv4'] is defined
+    with_items:
+      - "{{ groups['nodes'] }}"
+
+
+
+  - name: Enable Apache on system reboot
+    service:
+      name=httpd
+      enabled=yes
+    notify: restart apache
+  handlers:
+  - name: restart apache
+    service:
+      name=httpd
+      state=restarted
+
+ 
